@@ -45,6 +45,9 @@
 #include <stdio.h>
 #include "cmsis_os.h"
 
+#define LWIP_HTTPD_SSI 1
+#define LWIP_HTTPD_CGI 1
+
 #include "lwip/opt.h"
 #include "lwip/arch.h"
 #include "lwip/api.h"
@@ -53,10 +56,12 @@
 
 #include "httpserver.h"
 #include "global.h"
+#include "pingclient.h"
 #include "../Middlewares/Third_Party/LwIP/src/apps/httpd/fsdata.h"
+
+#define LWIP_HTTPD_SSI 1
+#define LWIP_HTTPD_CGI 1
 #include "lwip/apps/httpd.h"
-
-
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -64,7 +69,18 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 u32_t nPageHits = 0;
+
 static const char* day_tab[7] = {"sunday","monday", "tuesday","wednesday","thursdays","friday","saturday"};
+
+/* CGI handler for Restart control */
+const char * RESTART_CGI_Handler(int iIndex, int iNumParams, char *pcParam[], char *pcValue[]);
+
+/* Html request for "/restart.cgi" will start RESTART_CGI_Handler */
+const tCGI RESTART_CGI={"/restart.cgi", RESTART_CGI_Handler};
+
+/* Cgi call table, only one CGI used */
+tCGI CGI_TAB[1];
+
 
 /* Format of dynamic web page: the page header */
 
@@ -107,9 +123,16 @@ u16_t test_Handler(int iIndex, char *pcInsert, int iInsertLen)
 		memcpy(pcInsert, chaine, strlen(chaine));
         return strlen(chaine);
 	}
+	else if (gstate & STATE_EXTERNAL_PING_NA)
+	{
+	char* chaine = "<img src=\"images/led_rectangular_h_grey.png\" alt=\"N/A\">";
+			memcpy(pcInsert, chaine, strlen(chaine));
+	        return strlen(chaine);
+	}
 	else
 	{
-	char* chaine = "<img src=\"images/led_rectangular_h_red.png\" alt=\"OFF\">";
+	char chaine[100];
+	    sprintf(chaine, "<img src=\"images/led_rectangular_h_red.png\" alt=\"OFF\"><br />%d errors on %d max", External_campaign_ko, PINGCLIENT_NB_KO_REBOOT);
 			memcpy(pcInsert, chaine, strlen(chaine));
 	        return strlen(chaine);
 	}
@@ -122,11 +145,18 @@ u16_t test_Handler(int iIndex, char *pcInsert, int iInsertLen)
 		memcpy(pcInsert, chaine, strlen(chaine));
         return strlen(chaine);
 	}
-	else
+	else if (gstate & STATE_INTERNAL_PING_NA)
 	{
-	char* chaine = "<img src=\"images/led_rectangular_h_red.png\" alt=\"OFF\">";
+	char* chaine = "<img src=\"images/led_rectangular_h_grey.png\" alt=\"N/A\">";
 			memcpy(pcInsert, chaine, strlen(chaine));
 	        return strlen(chaine);
+	}
+	else
+	{
+		char chaine[100];
+		    sprintf(chaine, "<img src=\"images/led_rectangular_h_red.png\" alt=\"OFF\"><br />%d errors on %d max", Internal_campaign_ko, PINGCLIENT_NB_KO_REBOOT);
+				memcpy(pcInsert, chaine, strlen(chaine));
+		        return strlen(chaine);
 	}
   }
   if (iIndex == 3)
@@ -162,12 +192,52 @@ u16_t test_Handler(int iIndex, char *pcInsert, int iInsertLen)
   return 0;
 }
 
+
+const char * RESTART_CGI_Handler(int iIndex, int iNumParams, char *pcParam[], char *pcValue[])
+{
+  uint32_t i=0;
+
+  /* We have only one CGI handler iIndex = 0 */
+  if (iIndex==0)
+  {
+    /* Check cgi parameter : application GET /restart.cgi?external=1&internal=2 */
+	  // /restart.cgi?restart=external&restart=internal
+    for (i=0; i<iNumParams; i++)
+    {
+    	printf ("------->%d = %s + %s\n",i, pcParam[i], pcValue[i]);
+//      /* check parameter "led" */
+      if (strcmp(pcParam[i] , "restart")==0)
+      {
+          /* restart external device */
+          if(strcmp(pcValue[i], "external") == 0)
+          {
+        	  restart_external_device();
+          }
+          /* restart internal device */
+          if(strcmp(pcValue[i], "internal") == 0)
+          {
+        	  restart_internal_device();
+          }
+      }
+    }
+  }
+  /* uri to send after cgi call*/
+  return ("/ok.html");
+}
+
+
+
+
 static void http_server_socket_thread(void const * argument)
 {
   printf("-H- Tache HTTPD demarre...\n");
   httpd_init();
   /* configure SSI handlers (test page SSI) */
   http_set_ssi_handler(test_Handler, (char const **)TAGS, 5);
+
+  /* configure CGI handlers (LEDs control CGI) */
+  CGI_TAB[0] = RESTART_CGI;
+  http_set_cgi_handlers(CGI_TAB, 1);
 
   osThreadTerminate(NULL);
 }

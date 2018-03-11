@@ -59,6 +59,7 @@
 #include "lwip/ip4.h"
 #include "ip.h"
 #include "global.h"
+#include "restart.h"
 
 //#define USE_TRACE_INTERFACE_PING_CLIENT (1)
 #define USE_PRINTF (1)
@@ -88,10 +89,10 @@
 #define DEST1_IP_ADDR3   (uint8_t) 189
 
 // EXTERNAL IP
-#define DEST_IP_ADDR0   (uint8_t) 10
-#define DEST_IP_ADDR1   (uint8_t) 44
-#define DEST_IP_ADDR2   (uint8_t) 114
-#define DEST_IP_ADDR3   (uint8_t) 189
+#define DEST_IP_ADDR0   (uint8_t) 8
+#define DEST_IP_ADDR1   (uint8_t) 8
+#define DEST_IP_ADDR2   (uint8_t) 8
+#define DEST_IP_ADDR3   (uint8_t) 8
 #else
 // INTERNAL IP
 #define DEST1_IP_ADDR0   (uint8_t) 192
@@ -124,9 +125,9 @@
 #endif
 /** ping receive timeout - in milliseconds */
 #ifndef PING_RCV_TIMEO
-#define PING_RCV_TIMEO_SEC 10  // 10 seconds to align with Cat M1 and NB IoT latency
+#define PING_RCV_TIMEO_SEC 5
 #define PING_RCV_TIMEO_USEC 0
-#define PING_RCV_TIMEO_MS 10000
+#define PING_RCV_TIMEO_MS 5000
 #endif
     
 /* Private macro -------------------------------------------------------------*/
@@ -140,6 +141,8 @@ static u32_t ping_time;
 static u16_t ping_toggle = 0;
 static uint16_t External_ping_ok = 0;
 static uint16_t Internal_ping_ok = 0;
+uint16_t External_campaign_ko = 0;
+uint16_t Internal_campaign_ko = 0;
 
 /* State of PING_CLIENT (1 if active, 0 if not)*/
 static uint8_t ping_client_process_flag = 0;
@@ -349,34 +352,59 @@ static void ping_client_socket_thread(void const * argument)
             {
               // End of campaign
               //Update datas
-              printf("-P- Taux de reussite ping externe : %d%%\n", (100 * External_ping_ok) / PINGCLIENT_MAX_PING_COUNT);
-              if (((100 * External_ping_ok) / PINGCLIENT_MAX_PING_COUNT) > PINGCLIENT_MIN_EXTERNAL_PING_RATE)
-  		      {
-  		        gstateRm(gstate_mutex, STATE_EXTERNAL_PING_KO);
-  		        gstateAdd(gstate_mutex, STATE_EXTERNAL_PING_OK);
-  		      }
-  		      else
-  		      {
-  		        gstateRm(gstate_mutex, STATE_EXTERNAL_PING_OK);
-  		        gstateAdd(gstate_mutex, STATE_EXTERNAL_PING_KO);
-  		      }
-              printf("-P- Taux de reussite ping interne : %d%%\n", (100 * Internal_ping_ok) / PINGCLIENT_MAX_PING_COUNT);
-              if (((100 * Internal_ping_ok) / PINGCLIENT_MAX_PING_COUNT) > PINGCLIENT_MIN_INTERNAL_PING_RATE)
-  		      {
-  		        gstateRm(gstate_mutex, STATE_INTERNAL_PING_KO);
-  		        gstateAdd(gstate_mutex, STATE_INTERNAL_PING_OK);
-  		      }
-  		      else
-  		      {
-  		        gstateRm(gstate_mutex, STATE_INTERNAL_PING_OK);
-  		        gstateAdd(gstate_mutex, STATE_INTERNAL_PING_KO);
-  		      }
-              printf("-P- Pause de %d secondes\n", PINGCLIENT_CAMPAIGN_PERIOD/1000);
-              osDelay(PINGCLIENT_CAMPAIGN_PERIOD);
-              ping_counter = 0;
-              External_ping_ok = 0;
-              Internal_ping_ok = 0;
-            }
+            	if ((gstate & STATE_RESTART_EXTERNAL) == 0) // External restart not on going
+            	{
+            	  printf("-P- Taux de reussite ping externe : %d%%\n", (100 * External_ping_ok) / PINGCLIENT_MAX_PING_COUNT);
+                  if (((100 * External_ping_ok) / PINGCLIENT_MAX_PING_COUNT) > PINGCLIENT_MIN_EXTERNAL_PING_RATE)
+  		          {
+  		            //gstateRm(gstate_mutex, STATE_EXTERNAL_PING_KO);
+  		            gstateAdd(gstate_mutex, STATE_EXTERNAL_PING_OK);
+  		            HAL_GPIO_WritePin(GPIOB, LD2_Pin, GPIO_PIN_SET);
+                    printf("-P- External campaign OK\n");
+  		          }
+  		          else
+  		          {
+  		            gstateRm(gstate_mutex, STATE_EXTERNAL_PING_OK);
+  		            //gstateAdd(gstate_mutex, STATE_EXTERNAL_PING_KO);
+  		            HAL_GPIO_WritePin(GPIOB, LD2_Pin, GPIO_PIN_RESET);
+  		            dataSet(data_mutex, &External_campaign_ko, External_campaign_ko + 1);
+                    printf("-P- External campaign KO %d time(s)\n", External_campaign_ko);
+  		          }
+            	} // END External restart not on going
+            	if ((gstate & (STATE_RESTART_EXTERNAL | STATE_RESTART_INTERNAL)) == 0) // External or Internal restart on going
+            	{
+                  printf("-P- Taux de reussite ping interne : %d%%\n", (100 * Internal_ping_ok) / PINGCLIENT_MAX_PING_COUNT);
+                  if (((100 * Internal_ping_ok) / PINGCLIENT_MAX_PING_COUNT) > PINGCLIENT_MIN_INTERNAL_PING_RATE)
+  		          {
+  		            //gstateRm(gstate_mutex, STATE_INTERNAL_PING_KO);
+  		            gstateAdd(gstate_mutex, STATE_INTERNAL_PING_OK);
+  		            HAL_GPIO_WritePin(GPIOB, LD3_Pin, GPIO_PIN_SET);
+                    printf("-P- Internal campaign OK\n");
+  		          }
+  		          else
+  		          {
+  		            gstateRm(gstate_mutex, STATE_INTERNAL_PING_OK);
+  		            //gstateAdd(gstate_mutex, STATE_INTERNAL_PING_KO);
+  		            HAL_GPIO_WritePin(GPIOB, LD3_Pin, GPIO_PIN_RESET);
+  		            dataSet(data_mutex, &Internal_campaign_ko, Internal_campaign_ko + 1);
+                    printf("-P- Internal campaign KO %d time(s)\n", Internal_campaign_ko);
+  		          }
+            	} // END External or Internal restart on going
+                if (External_campaign_ko >= PINGCLIENT_NB_KO_REBOOT)
+                {
+                  restart_external_device();
+                }
+                if (Internal_campaign_ko >= PINGCLIENT_NB_KO_REBOOT)
+                {
+                  restart_internal_device();
+                }
+                printf("-P- Pause de %d secondes\n", PINGCLIENT_CAMPAIGN_PERIOD/1000);
+                printf("-------------------------------------------------------\n");
+                osDelay(PINGCLIENT_CAMPAIGN_PERIOD);
+                ping_counter = 0;
+                External_ping_ok = 0;
+                Internal_ping_ok = 0;
+              }
           }
   }
 }

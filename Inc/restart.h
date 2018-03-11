@@ -76,7 +76,8 @@ extern osThreadId RestartInternalHandle;
 /* Exported functions ------------------------------------------------------------*/
 void restart_internal_init(void);
 void restart_external_init(void);
-
+void restart_internal_device(void);
+void restart_external_device(void);
 
 //#ifdef __cplusplus
 //}

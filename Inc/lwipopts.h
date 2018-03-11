@@ -117,6 +117,8 @@
 #define DEFAULT_ACCEPTMBOX_SIZE 6
 /*----- Value in opt.h for RECV_BUFSIZE_DEFAULT: INT_MAX -----*/
 #define RECV_BUFSIZE_DEFAULT 2000000000
+/*----- Default Value for LWIP_HTTPD: 0 ---*/
+#define LWIP_HTTPD 1
 /*----- Value in opt.h for LWIP_STATS: 1 -----*/
 #define LWIP_STATS 0
 /*----- Value in opt.h for CHECKSUM_GEN_IP: 1 -----*/
@@ -185,6 +187,7 @@
 #define CHECKSUM_BY_HARDWARE 1
 
 #define LWIP_HTTPD_SSI 1
+#define LWIP_HTTPD_CGI 1
 //#define LWIP_HTTPD_DYNAMIC_HEADERS 1
 /* USER CODE END 1 */
 

@@ -2,7 +2,7 @@
  * global.c
  *
  *  Created on: Feb 21, 2018
- *      
+ *      Author: laporte
  */
 
 #include "global.h"
@@ -31,3 +31,10 @@ void gstateRm(SemaphoreHandle_t s, uint16_t v)
   }
 }
 
+void dataSet(SemaphoreHandle_t s, uint16_t* v, uint16_t d)
+{
+  if( xSemaphoreTake(s, ( TickType_t ) 10 ) == pdTRUE ) {
+    *v = d;
+    xSemaphoreGive( s );
+  }
+}

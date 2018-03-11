@@ -58,10 +58,11 @@
 #define PINGCLIENT_THREAD_PRIO osPriorityNormal
 
 #define PINGCLIENT_MAX_PING_COUNT         5    // number of ping for each of the 2 IPs to ping
-#define PINGCLIENT_MIN_EXTERNAL_PING_RATE 80  // Percent between 0 and 100
-#define PINGCLIENT_MIN_INTERNAL_PING_RATE 80  // Percent between 0 and 100
+#define PINGCLIENT_MIN_EXTERNAL_PING_RATE 80   // Percent between 0 and 100
+#define PINGCLIENT_MIN_INTERNAL_PING_RATE 80   // Percent between 0 and 100
 #define PINGCLIENT_SEND_PERIOD            500  // in millisecond
 #define PINGCLIENT_CAMPAIGN_PERIOD        3000 // in millisecond
+#define PINGCLIENT_NB_KO_REBOOT           5    // number of ping campaign with KO result before reboot
  /* Exported types ------------------------------------------------------------*/
 typedef enum
 {
@@ -70,6 +71,8 @@ typedef enum
 } ping_client_status_t;
 
 
+extern uint16_t External_campaign_ko;
+extern uint16_t Internal_campaign_ko;
 extern osThreadId pingClientTaskHandle;
 
 /* Exported functions ------------------------------------------------------------*/
