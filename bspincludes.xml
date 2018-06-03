@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdtprojectproperties>
+<section name="org.eclipse.cdt.internal.ui.wizards.settingswizards.IncludePaths">
+<language name="S">
+<includepath>Drivers/BSP/Components/Common</includepath>
+<includepath>Drivers/BSP/Components/hts221</includepath>
+<includepath>Drivers/BSP/Components/lis3mdl</includepath>
+<includepath>Drivers/BSP/Components/lps22hb</includepath>
+<includepath>Drivers/BSP/Components/lps25hb</includepath>
+<includepath>Drivers/BSP/Components/lsm303agr</includepath>
+<includepath>Drivers/BSP/Components/lsm6ds0</includepath>
+<includepath>Drivers/BSP/Components/lsm6ds3</includepath>
+<includepath>Drivers/BSP/Components/lsm6dsl</includepath>
+<includepath>Drivers/BSP/Components/lsm6dsm</includepath>
+<includepath>inc</includepath>
+<includepath>Drivers/STM32F2xx_HAL_Driver/inc</includepath>
+<includepath>Drivers/CMSIS/Device/ST/STM32F2xx/Include</includepath>
+<includepath>Drivers/CMSIS/Include</includepath>
+
+</language>
+<language name="C Source File">
+<includepath>Drivers/BSP/Components/Common</includepath>
+<includepath>Drivers/BSP/Components/hts221</includepath>
+<includepath>Drivers/BSP/Components/lis3mdl</includepath>
+<includepath>Drivers/BSP/Components/lps22hb</includepath>
+<includepath>Drivers/BSP/Components/lps25hb</includepath>
+<includepath>Drivers/BSP/Components/lsm303agr</includepath>
+<includepath>Drivers/BSP/Components/lsm6ds0</includepath>
+<includepath>Drivers/BSP/Components/lsm6ds3</includepath>
+<includepath>Drivers/BSP/Components/lsm6dsl</includepath>
+<includepath>Drivers/BSP/Components/lsm6dsm</includepath>
+<includepath>inc</includepath>
+<includepath>Drivers/STM32F2xx_HAL_Driver/inc</includepath>
+<includepath>Drivers/CMSIS/Device/ST/STM32F2xx/Include</includepath>
+<includepath>Drivers/CMSIS/Include</includepath>
+
+</language>
+<language name="Object File">
+
+</language>
+<language name="Assembly Source File">
+
+</language>
+<language name="s">
+
+</language>
+</section>
+</cdtprojectproperties>

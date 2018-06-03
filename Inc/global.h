@@ -24,6 +24,9 @@
 #define STATE_RESTART_EXTERNAL 256
 
 extern uint16_t gstate;
+extern char HumidityChar[6];
+extern char PressureChar[8];
+extern char TemperatureChar[6];
 extern SemaphoreHandle_t gstate_mutex;
 extern SemaphoreHandle_t data_mutex;
 extern void gstateSet(SemaphoreHandle_t s, uint16_t v);

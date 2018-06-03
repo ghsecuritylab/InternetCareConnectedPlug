@@ -53,14 +53,14 @@
 
 /* USER CODE BEGIN Includes */
 //#include <stdio.h>
+#include "environement.h"
 #include "pingclient.h"
-//#include "supervisor.h"
 #include "global.h"
 
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
-I2C_HandleTypeDef hi2c1;
+//I2C_HandleTypeDef hi2c1;
 
 UART_HandleTypeDef huart3;
 
@@ -93,7 +93,7 @@ PUTCHAR_PROTOTYPE
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART3_UART_Init(void);
-static void MX_I2C1_Init(void);
+//static void MX_I2C1_Init(void);
 void StartDefaultTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
@@ -138,7 +138,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART3_UART_Init();
-  MX_I2C1_Init();
+//  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
   printf("\n\nDebut !!\n\r");
 
@@ -243,24 +243,24 @@ void SystemClock_Config(void)
 }
 
 /* I2C1 init function */
-static void MX_I2C1_Init(void)
-{
-
-  hi2c1.Instance = I2C1;
-  hi2c1.Init.ClockSpeed = 100000;
-  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-  hi2c1.Init.OwnAddress1 = 0;
-  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c1.Init.OwnAddress2 = 0;
-  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-}
+//static void MX_I2C1_Init(void)
+//{
+//
+//  hi2c1.Instance = I2C1;
+//  hi2c1.Init.ClockSpeed = 100000;
+//  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
+//  hi2c1.Init.OwnAddress1 = 0;
+//  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+//  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+//  hi2c1.Init.OwnAddress2 = 0;
+//  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+//  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+//  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+//  {
+//    _Error_Handler(__FILE__, __LINE__);
+//  }
+//
+//}
 
 /* USART3 init function */
 static void MX_USART3_UART_Init(void)
@@ -376,7 +376,7 @@ static void MX_GPIO_Init(void)
 void StartDefaultTask(void const * argument)
 {
   /* init code for LWIP */
-  MX_LWIP_Init();
+  //MX_LWIP_Init();
 
   /* USER CODE BEGIN 5 */
   uint32_t ip, a, b, c, d;
@@ -394,15 +394,15 @@ void StartDefaultTask(void const * argument)
 
   data_mutex = xSemaphoreCreateMutex();
   uint8_t LocalBuf[100];
-  HAL_I2C_Master_Transmit(&hi2c1, 0xBE, LocalBuf, 100, 10000);
-  HAL_I2C_Master_Receive(&hi2c1, 0xBE, LocalBuf, 100, 10000);
-  HAL_I2C_Slave_Transmit(&hi2c1, LocalBuf, 100, 10000);
-  HAL_I2C_Slave_Receive(&hi2c1, LocalBuf, 100, 10000);
 
   /* add the network interface (IPv4/IPv6) with RTOS */
   CP_ipaddr.addr = 0;
   CP_netmask.addr = 0;
   CP_gw.addr = 0;
+
+  EnvironementInit();
+
+
   //netif_add(&gnetif, &CP_ipaddr, &CP_netmask, &CP_gw, NULL, &ethernetif_init, &tcpip_input);
   while (CablePresent == 0) {
     netif_add(&gnetif, &CP_ipaddr, &CP_netmask, &CP_gw, NULL, &ethernetif_init, &tcpip_input);

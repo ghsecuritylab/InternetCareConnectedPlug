@@ -59,7 +59,8 @@ Etats de la board<br /><br />
 </div>
 </div>
 <!-- DivTable.com -->
-
-
+<br />Température : <!--#Temp-->°c<br />
+Humidité : <!--#Hum-->%<br />
+Pression : <!--#Press--> hPa<br />
 </body>
 </html>

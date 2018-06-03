@@ -3,9 +3,112 @@
 <head>
 <title> My connected Plug</title>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<meta http-equiv="refresh" content="1">
+<!-- <meta http-equiv="refresh" content="10"> -->
+<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+<style>
+/* DivTable.com */
+.divTable{
+	display: table;
+/*	width: 100%;*/
+}
+.divTableRow {
+	display: table-row;
+}
+.divTableHeading {
+	background-color: #EEE;
+	display: table-header-group;
+}
+.divTableCell, .divTableHead {
+	border: 1px solid #999999;
+	display: table-cell;
+	padding: 3px 10px;
+}
+.divTableHeading {
+	background-color: #EEE;
+	display: table-header-group;
+	font-weight: bold;
+}
+.divTableFoot {
+	background-color: #EEE;
+	display: table-footer-group;
+	font-weight: bold;
+}
+.divTableBody {
+	display: table-row-group;
+}
+</style>
+</head>
 <body>
-Premier essai, juste du texte<br />
-<div w3-include-html="content.html"></div>
+<script type="text/javascript">
+var Iter=-1;
+$(document).ready(function(){
+  refreshIP();
+});
+
+function refreshIP(){
+    $('#IP').load('getIP.shtml', function(){
+       setTimeout(refreshEXpingOK, 100);
+    });
+}
+function refreshEXpingOK(){
+    $('#EXpingOK').load('getEXpingOK.shtml', function(){
+       setTimeout(refreshINpingOK, 100);
+    });
+}
+function refreshINpingOK(){
+    $('#INpingOK').load('getINpingOK.shtml', function(){
+       setTimeout(refreshEXboot, 100);
+    });
+}
+function refreshEXboot(){
+    $('#EXboot').load('getEXboot.shtml', function(){
+       setTimeout(refreshINboot, 100);
+    });
+}
+function refreshINboot(){
+    $('#INboot').load('getINboot.shtml', function(){
+       setTimeout(refreshTemp, 100);
+    });
+}
+function refreshTemp(){
+    $('#Temp').load('getTemp.shtml', function(){
+       setTimeout(refreshHum, 100);
+    });
+}
+function refreshHum(){
+    $('#Hum').load('getHum.shtml', function(){
+       setTimeout(refreshPress, 100);
+    });
+}
+function refreshPress(){
+    $('#Press').load('getPress.shtml', function(){
+       setTimeout(refreshIP, 15000);
+    });
+}
+</script>
+Etats de la board<br /><br />
+
+<div class="divTable">
+<div class="divTableBody">
+<div class="divTableRow">
+<div class="divTableCell">IP</div>
+<div class="divTableCell">External ping</div>
+<div class="divTableCell">Internal ping</div>
+<div class="divTableCell">External reboot</div>
+<div class="divTableCell">Internal reboot</div>
+</div>
+<div class="divTableRow">
+<div id="IP" class="divTableCell">No data</div>
+<div id="EXpingOK" class="divTableCell">No data</div>
+<div id="INpingOK" class="divTableCell">No data</div>
+<div id="EXboot" class="divTableCell">No data</div>
+<div id="INboot" class="divTableCell">No data</div>
+</div>
+</div>
+</div>
+<!-- DivTable.com -->
+<br />Température : <div id="Temp" style="display:inline-block;">No data</div>°c<br />
+Humidité : <div id="Hum" style="display:inline-block;">No data</div>%<br />
+Pression : <div id="Press" style="display:inline-block;">No data</div> hPa<br />
 </body>
 </html>

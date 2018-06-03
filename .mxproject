@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=C:/Users/laporte/Projects/Work/ConnectedPlugStWorkBench/Inc
+HeaderPath=C:/Users/laporte/Projects/Work/ConnectedPlugStWorkBenchWORK/Inc
 HeaderFiles=FreeRTOSConfig.h;lwip.h;lwipopts.h;ethernetif.h;stm32f2xx_it.h;stm32f2xx_hal_conf.h;main.h;
-SourcePath=C:/Users/laporte/Projects/Work/ConnectedPlugStWorkBench/Src
+SourcePath=C:/Users/laporte/Projects/Work/ConnectedPlugStWorkBenchWORK/Src
 SourceFiles=freertos.c;lwip.c;ethernetif.c;syscalls.c;stm32f2xx_it.c;stm32f2xx_hal_msp.c;stm32f2xx_hal_timebase_TIM.c;main.c;
 
 [PreviousLibFiles]

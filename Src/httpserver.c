@@ -70,7 +70,7 @@
 /* Private variables ---------------------------------------------------------*/
 u32_t nPageHits = 0;
 
-static const char* day_tab[7] = {"sunday","monday", "tuesday","wednesday","thursdays","friday","saturday"};
+//static const char* day_tab[7] = {"sunday","monday", "tuesday","wednesday","thursdays","friday","saturday"};
 
 /* CGI handler for Restart control */
 const char * RESTART_CGI_Handler(int iIndex, int iNumParams, char *pcParam[], char *pcValue[]);
@@ -88,9 +88,9 @@ tCGI CGI_TAB[1];
 //char const* TAGCHAR="IP";
 //char const** TAGS=&TAGCHAR;
 
-char const** TAGS[] = {{"IP"}, {"EXpingOK"}, {"INpingOK"}, {"EXboot"}, {"INboot"}};
+char const** TAGS[] = {{"IP"}, {"EXpingOK"}, {"INpingOK"}, {"EXboot"}, {"INboot"}, {"Temp"}, {"Hum"}, {"Press"}};
 
-
+SemaphoreHandle_t SSI_mutex = NULL;
 osThreadId httpServerTaskHandle = NULL;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -100,19 +100,22 @@ osThreadId httpServerTaskHandle = NULL;
   */
 u16_t test_Handler(int iIndex, char *pcInsert, int iInsertLen)
 {
+  //if( xSemaphoreTake(SSI_mutex, ( TickType_t ) 10 ) == pdTRUE ){
   if (iIndex == 0)
   {
 	if (gstate & STATE_IP)
 	{
 	char* chaine = "<img src=\"images/led_rectangular_h_green.png\" alt=\"ON\">";
 		memcpy(pcInsert, chaine, strlen(chaine));
-        return strlen(chaine);
+//		xSemaphoreGive(SSI_mutex);
+		return strlen(chaine);
 	}
 	else
 	{
 	char* chaine = "<img src=\"images/led_rectangular_h_red.png\" alt=\"OFF\">";
 			memcpy(pcInsert, chaine, strlen(chaine));
-	        return strlen(chaine);
+//			xSemaphoreGive(SSI_mutex);
+			return strlen(chaine);
 	}
   }
   if (iIndex == 1)
@@ -121,20 +124,23 @@ u16_t test_Handler(int iIndex, char *pcInsert, int iInsertLen)
 	{
 	char* chaine = "<img src=\"images/led_rectangular_h_green.png\" alt=\"ON\">";
 		memcpy(pcInsert, chaine, strlen(chaine));
-        return strlen(chaine);
+//		xSemaphoreGive(SSI_mutex);
+		return strlen(chaine);
 	}
 	else if (gstate & STATE_EXTERNAL_PING_NA)
 	{
 	char* chaine = "<img src=\"images/led_rectangular_h_grey.png\" alt=\"N/A\">";
 			memcpy(pcInsert, chaine, strlen(chaine));
-	        return strlen(chaine);
+//			xSemaphoreGive(SSI_mutex);
+			return strlen(chaine);
 	}
 	else
 	{
 	char chaine[100];
 	    sprintf(chaine, "<img src=\"images/led_rectangular_h_red.png\" alt=\"OFF\"><br />%d errors on %d max", External_campaign_ko, PINGCLIENT_NB_KO_REBOOT);
 			memcpy(pcInsert, chaine, strlen(chaine));
-	        return strlen(chaine);
+//			xSemaphoreGive(SSI_mutex);
+			return strlen(chaine);
 	}
   }
   if (iIndex == 2)
@@ -143,20 +149,23 @@ u16_t test_Handler(int iIndex, char *pcInsert, int iInsertLen)
 	{
 	char* chaine = "<img src=\"images/led_rectangular_h_green.png\" alt=\"ON\">";
 		memcpy(pcInsert, chaine, strlen(chaine));
-        return strlen(chaine);
+//		xSemaphoreGive(SSI_mutex);
+		return strlen(chaine);
 	}
-	else if (gstate & STATE_INTERNAL_PING_NA)
+	if (gstate & STATE_INTERNAL_PING_NA)
 	{
 	char* chaine = "<img src=\"images/led_rectangular_h_grey.png\" alt=\"N/A\">";
 			memcpy(pcInsert, chaine, strlen(chaine));
-	        return strlen(chaine);
+//			xSemaphoreGive(SSI_mutex);
+			return strlen(chaine);
 	}
 	else
 	{
 		char chaine[100];
 		    sprintf(chaine, "<img src=\"images/led_rectangular_h_red.png\" alt=\"OFF\"><br />%d errors on %d max", Internal_campaign_ko, PINGCLIENT_NB_KO_REBOOT);
 				memcpy(pcInsert, chaine, strlen(chaine));
-		        return strlen(chaine);
+//				xSemaphoreGive(SSI_mutex);
+				return strlen(chaine);
 	}
   }
   if (iIndex == 3)
@@ -165,13 +174,15 @@ u16_t test_Handler(int iIndex, char *pcInsert, int iInsertLen)
 	{
 	char* chaine = "<img src=\"images/led_rectangular_h_blue.png\" alt=\"ON\">";
 		memcpy(pcInsert, chaine, strlen(chaine));
-        return strlen(chaine);
+//		xSemaphoreGive(SSI_mutex);
+		return strlen(chaine);
 	}
 	else
 	{
 	char* chaine = "<img src=\"images/led_rectangular_h_grey.png\" alt=\"OFF\">";
 			memcpy(pcInsert, chaine, strlen(chaine));
-	        return strlen(chaine);
+//			xSemaphoreGive(SSI_mutex);
+			return strlen(chaine);
 	}
   }
   if (iIndex == 4)
@@ -180,16 +191,38 @@ u16_t test_Handler(int iIndex, char *pcInsert, int iInsertLen)
 	{
 	char* chaine = "<img src=\"images/led_rectangular_h_blue.png\" alt=\"ON\">";
 		memcpy(pcInsert, chaine, strlen(chaine));
-        return strlen(chaine);
+//		xSemaphoreGive(SSI_mutex);
+		return strlen(chaine);
 	}
 	else
 	{
 	char* chaine = "<img src=\"images/led_rectangular_h_grey.png\" alt=\"OFF\">";
 			memcpy(pcInsert, chaine, strlen(chaine));
-	        return strlen(chaine);
+//			xSemaphoreGive(SSI_mutex);
+			return strlen(chaine);
 	}
   }
+  if (iIndex == 5)
+  {
+    memcpy(pcInsert, TemperatureChar, strlen(TemperatureChar));
+//    xSemaphoreGive(SSI_mutex);
+    return (strlen(TemperatureChar));
+  }
+  else if (iIndex == 6)
+  {
+    memcpy(pcInsert, HumidityChar, strlen(HumidityChar));
+//    xSemaphoreGive(SSI_mutex);
+    return (strlen(HumidityChar));
+  }
+  if (iIndex == 7)
+  {
+    memcpy(pcInsert, PressureChar, strlen(PressureChar));
+//    xSemaphoreGive(SSI_mutex);
+    return (strlen(PressureChar));
+  }
+//  xSemaphoreGive(SSI_mutex);
   return 0;
+//}
 }
 
 
@@ -233,7 +266,7 @@ static void http_server_socket_thread(void const * argument)
   printf("-H- Tache HTTPD demarre...\n");
   httpd_init();
   /* configure SSI handlers (test page SSI) */
-  http_set_ssi_handler(test_Handler, (char const **)TAGS, 5);
+  http_set_ssi_handler(test_Handler, (char const **)TAGS, 8);
 
   /* configure CGI handlers (LEDs control CGI) */
   CGI_TAB[0] = RESTART_CGI;

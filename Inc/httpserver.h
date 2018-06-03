@@ -51,7 +51,7 @@
 #include "cmsis_os.h"
 
 #define HTTPSERVER_THREAD_STACK_SIZE        512
-#define HTTPSERVER_THREAD_PRIO osPriorityNormal
+#define HTTPSERVER_THREAD_PRIO osPriorityAboveNormal
 
 extern osThreadId pingClientTaskHandle;
 
